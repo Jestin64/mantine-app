@@ -11,15 +11,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
-    if (username === "admin" && password === "password") {
-      onLogin();
-    } else {
-      alert("Invalid credentials");
-    }
+    onLogin();
   };
 
   return (
-    <Container size={420}>
+    <Container
+      size={420}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        width: "100vw",
+      }}
+    >
       <Title ta="center">Login</Title>
       <Box mt="lg">
         <TextInput

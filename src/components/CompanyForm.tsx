@@ -1,6 +1,5 @@
-// src/components/CompanyForm.tsx
-import React, { useState, useEffect } from 'react';
-import { TextInput, Button, Box } from '@mantine/core';
+import React, { useState, useEffect } from "react";
+import { TextInput, Button, Box } from "@mantine/core";
 
 interface Company {
   name: string;
@@ -9,11 +8,15 @@ interface Company {
 interface CompanyFormProps {
   initialData?: Company;
   onSubmit: (company: Company) => void;
+  setEditingCompany: (company: Company | null) => void;
 }
 
-const CompanyForm: React.FC<CompanyFormProps> = ({ initialData, onSubmit }) => {
-  const [name, setName] = useState('');
-
+const CompanyForm: React.FC<CompanyFormProps> = ({
+  initialData,
+  onSubmit,
+  setEditingCompany,
+}) => {
+  const [name, setName] = useState("");
   useEffect(() => {
     if (initialData) {
       setName(initialData.name);
@@ -25,14 +28,34 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ initialData, onSubmit }) => {
   };
 
   return (
-    <Box mt="lg">
+    // style this more professionally
+    <Box
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "10px",
+      }}
+    >
       <TextInput
         label="Company Name"
         value={name}
         onChange={(event) => setName(event.target.value)}
       />
-      <Button fullWidth mt="xl" onClick={handleSubmit}>
-        {initialData ? 'Update' : 'Add'} Company
+      <Button fullWidth mt="xl" onClick={handleSubmit} variant="outline">
+        {initialData ? "Update" : "Add"} Company
+      </Button>
+      {/* route to previous page */}
+      <Button
+        fullWidth
+        mt="xl"
+        onClick={() => {
+          setEditingCompany(null);
+        }}
+        variant="outline"
+      >
+        Cancel
       </Button>
     </Box>
   );
