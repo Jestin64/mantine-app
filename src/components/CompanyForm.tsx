@@ -1,34 +1,60 @@
 import React, { useState, useEffect } from "react";
 import { TextInput, Button, Box } from "@mantine/core";
-
-interface Company {
-  name: string;
-}
-
+import { CompanyInterface } from "../App";
+import { defaultCompanyData, getLocalApiKey } from "../utils";
 interface CompanyFormProps {
-  initialData?: Company;
-  onSubmit: (company: Company) => void;
-  setEditingCompany: (company: Company | null) => void;
+  initialData?: CompanyInterface;
+  setCompanies: any;
+  setEditingCompany: (company: CompanyInterface | null) => void;
 }
 
 const CompanyForm: React.FC<CompanyFormProps> = ({
   initialData,
-  onSubmit,
+  setCompanies,
   setEditingCompany,
 }) => {
-  const [name, setName] = useState("");
-  useEffect(() => {
-    if (initialData) {
-      setName(initialData.name);
-    }
-  }, [initialData]);
+  const [companyName, setCompanyName] = useState("");
 
-  const handleSubmit = () => {
-    onSubmit({ name });
+  const handleSubmit = async () => {
+    if (companyName !== "") {
+      const date = new Date().toISOString();
+      const apiKey = getLocalApiKey();
+      try {
+        const bodyData = {
+          ...defaultCompanyData,
+          name: companyName,
+          createdOn: date,
+        };
+        const response = await fetch(
+          `https://api.recruitly.io/api/company?apiKey=${apiKey}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(bodyData),
+          }
+        );
+
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+        // testing
+        console.log(data);
+        setCompanies((prev) => [...prev, data]);
+        setEditingCompany(null);
+        setCompanyName("");
+      } catch (err) {
+        console.error(err);
+        alert("An error occurred while adding the company.");
+      }
+    } else {
+      alert("Please enter a company name.");
+    }
   };
 
   return (
-    // style this more professionally
     <Box
       style={{
         display: "flex",
@@ -40,22 +66,22 @@ const CompanyForm: React.FC<CompanyFormProps> = ({
     >
       <TextInput
         label="Company Name"
-        value={name}
-        onChange={(event) => setName(event.target.value)}
+        value={companyName}
+        onChange={(event) => setCompanyName(event.target.value)}
       />
       <Button fullWidth mt="xl" onClick={handleSubmit} variant="outline">
         {initialData ? "Update" : "Add"} Company
       </Button>
-      {/* route to previous page */}
       <Button
         fullWidth
         mt="xl"
         onClick={() => {
           setEditingCompany(null);
+          setCompanyName("");
         }}
         variant="outline"
       >
-        Cancel
+        Clear
       </Button>
     </Box>
   );

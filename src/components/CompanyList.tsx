@@ -1,18 +1,20 @@
 // src/components/CompanyList.tsx
-import React from 'react';
-import { Table, Button } from '@mantine/core';
-
-interface Company {
-  name: string;
-}
+import React, { useEffect, useState } from "react";
+import { Table, Button } from "@mantine/core";
+import { CompanyInterface } from "../App";
+import { CustomButton } from "./helpComponents/CustomButton";
 
 interface CompanyListProps {
-  companies: Company[];
-  onViewCompany: (company: Company) => void;
-  onEditCompany: (company: Company) => void;
+  companies: CompanyInterface;
+  onViewCompany: (company: CompanyInterface) => void;
+  onEditCompany: (company: CompanyInterface) => void;
 }
 
-const CompanyList: React.FC<CompanyListProps> = ({ companies, onViewCompany, onEditCompany }) => {
+const CompanyList: React.FC<CompanyListProps> = ({
+  companies,
+  onViewCompany,
+  onEditCompany,
+}) => {
   return (
     <Table>
       <thead>
@@ -22,16 +24,16 @@ const CompanyList: React.FC<CompanyListProps> = ({ companies, onViewCompany, onE
         </tr>
       </thead>
       <tbody>
-        {companies.map((company, index) => (
+        {companies?.data?.map((company, index) => (
           <tr key={index}>
             <td>{company.name}</td>
             <td>
-              <Button size="xs" onClick={() => onViewCompany(company)}>
+              <CustomButton onClick={() => onViewCompany(company)}>
                 View
-              </Button>
-              <Button size="xs" ml="xs" onClick={() => onEditCompany(company)}>
+              </CustomButton>
+              <CustomButton onClick={() => onEditCompany(company)}>
                 Edit
-              </Button>
+              </CustomButton>
             </td>
           </tr>
         ))}

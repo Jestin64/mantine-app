@@ -7,25 +7,33 @@ import Navbar from "./components/Navbar";
 import {
   getLocalApiKey,
   getLocalUserLogin,
-  removeLocalApiKey,
-  removeLocalUserLogin,
   setLocalApiKey,
   setLocalUserLogin,
 } from "./utils";
+import {
+  addOrUpdateCompany,
+  fetchCompanies,
+  handleLogin,
+  handleLogout,
+} from "./helpers";
 
-interface Company {
-  name: string;
+export interface CompanyInterface {
+  data: any[];
+  totalCount: number;
 }
 
 const API_KEY = "HIRE840770DDB2F381CA41BA84AA6A9ABE68B0EE";
 
 const App: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [currentViewCompany, setCurrentViewCompany] = useState<Company | null>(
+  const [companies, setCompanies] = useState<any>([]);
+  const [currentViewCompany, setCurrentViewCompany] =
+    useState<CompanyInterface | null>(null);
+  // console.log("currentViewCompany", currentViewCompany);
+  const [editingCompany, setEditingCompany] = useState<CompanyInterface | null>(
     null
   );
-  const [editingCompany, setEditingCompany] = useState<Company | null>(null);
+  const [error, setError] = useState<any>(null);
 
   useEffect(() => {
     if (!getLocalApiKey()) setLocalApiKey(API_KEY);
@@ -33,37 +41,18 @@ const App: React.FC = () => {
     if (userLogin) setLoggedIn(true);
   }, []);
 
-  const handleLogin = () => {
-    setLoggedIn(true);
-    setLocalUserLogin(true);
-  };
-  const handleLogout = () => {
-    if (getLocalApiKey()) removeLocalApiKey();
-    setLoggedIn(false);
-    removeLocalUserLogin();
-  };
-
-  const addOrUpdateCompany = (company: Company) => {
-    if (editingCompany) {
-      setCompanies((prev) =>
-        prev.map((c) => (c.name === editingCompany.name ? company : c))
-      );
-      setEditingCompany(null);
-    } else {
-      setCompanies((prev) => [...prev, company]);
-    }
-  };
-
-  const handleViewCompany = (company: Company) => {
-    setCurrentViewCompany(company);
-  };
-
-  const handleEditCompany = (company: Company) => {
-    setEditingCompany(company);
-  };
+  useEffect(() => {
+    fetchCompanies({ setCompanies, setError });
+  }, []);
 
   if (!loggedIn) {
-    return <LoginPage onLogin={handleLogin} />;
+    return (
+      <LoginPage
+        onLogin={(username, password) =>
+          handleLogin({ setLoggedIn, setLocalUserLogin, username, password })
+        }
+      />
+    );
   }
 
   return (
@@ -75,9 +64,19 @@ const App: React.FC = () => {
         alignItems: "center",
         height: "100vh",
         width: "100vw",
+        backgroundColor: "#ffeed8 !important",
       }}
     >
-      <Navbar onLogout={handleLogout} />
+      <Navbar
+        onLogout={() =>
+          handleLogout({
+            setLoggedIn,
+            setCompanies,
+            setCurrentViewCompany,
+            setEditingCompany,
+          })
+        }
+      />
       {currentViewCompany ? (
         <CompanyView
           company={currentViewCompany}
@@ -87,13 +86,13 @@ const App: React.FC = () => {
         <>
           <CompanyForm
             initialData={editingCompany || undefined}
-            onSubmit={addOrUpdateCompany}
+            setCompanies={setCompanies}
             setEditingCompany={setEditingCompany}
           />
           <CompanyList
             companies={companies}
-            onViewCompany={handleViewCompany}
-            onEditCompany={handleEditCompany}
+            onViewCompany={(company) => setCurrentViewCompany(company)}
+            onEditCompany={(company) => setEditingCompany(company)}
           />
         </>
       )}
